@@ -23,6 +23,9 @@ https://beta.vocalcat.com/v1/meet
 }
 ```
 
+clientId and clientKey comes from the settings integration tab
+userId is a identifier from your system for a user, only accepts alphanumeric, - _  @, no more than 125 characters, and no spaces. if the user does not exists it gets created.
+
 #### Response
 ```json
 {
