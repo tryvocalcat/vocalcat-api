@@ -85,7 +85,7 @@ Returns a list of social accounts linked to the authenticated user.
 **GET** `/social/auth`
 
 #### Query Parameters
-- `socialName`: Name of the social network (e.g., "linkedin")
+- `socialName`: Name of the social network. Supported: "facebook", "instagram", "linkedin", "threads".
 
 #### Headers
 ```http
