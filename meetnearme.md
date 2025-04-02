@@ -1,12 +1,22 @@
 # MeetNearMe API Documentation
 
 ## Overview
-The `MeetNearMe` provides authentication and social integration endpoints for the **MeetNearMe** service. This API allows clients to authenticate users, retrieve social accounts, generate OAuth URLs for social authentication, and create content.
+
+The **VocalCat API** provides endpoints for authentication and social media integration. It allows clients to authenticate users, manage social accounts, generate OAuth URLs for social authentication, and create content. This API simplifies user management and social media operations for services integrated with MeetNearMe. 
 
 ## Base URL
+
+The base URL for the API is:
+
 ```
 https://beta.vocalcat.com/v1/meet
 ```
+
+## Authentication
+
+All API requests require authentication via an **access token**. This token must be included in the request headers or query parameters.
+
+---
 
 ## Endpoints
 
@@ -15,6 +25,9 @@ https://beta.vocalcat.com/v1/meet
 **POST** `/auth/token`
 
 #### Request
+
+To authenticate a client and generate an access token for the user, submit a `POST` request with the following JSON payload:
+
 ```json
 {
   "clientId": "your-client-id",
@@ -23,10 +36,14 @@ https://beta.vocalcat.com/v1/meet
 }
 ```
 
-clientId and clientKey comes from the settings integration tab
-userId is a identifier from your system for a user, only accepts alphanumeric, - _  @, no more than 125 characters, and no spaces. if the user does not exists it gets created.
+- `clientId`: Your unique client identifier (obtained from the settings integration tab).
+- `userId`: The unique identifier for the user within your system. It must be alphanumeric and can include hyphens, underscores, and the "@" symbol. The `userId` cannot exceed 125 characters and must not contain spaces. If the user does not exist, they will be created automatically.
+- `clientKey`: Your secret client key (obtained from the settings integration tab).
 
 #### Response
+
+On success, the server will return the following JSON response:
+
 ```json
 {
   "AccessCode": "encoded-access-token",
@@ -34,37 +51,54 @@ userId is a identifier from your system for a user, only accepts alphanumeric, -
 }
 ```
 
-#### Description
-
-Authenticates a client and generates an access code for the user.
-
-### 2. Retrieve Token (GET)
-**GET** `/auth/token`
-
-#### Request
-Query Parameters:
-- `clientId`: Client ID
-- `userId`: User ID
-- `clientKey`: Client Key
-
-#### Response
-Same as **POST** `/auth/token`
+- `AccessCode`: The access token for authenticating subsequent API requests.
+- `ExpiresAt`: The expiration timestamp of the access token.
 
 #### Description
-Alternative method to request an access token via query parameters.
+
+This endpoint authenticates the client and generates an access token for the user. The token is valid until the `ExpiresAt` timestamp.
 
 ---
 
-### 3. Get User's Social Accounts
+### 2. Retrieve Token (GET)
+
+**GET** `/auth/token`
+
+#### Request
+
+This is an alternative method to retrieve an access token by passing parameters via the query string.
+
+**Query Parameters:**
+
+- `clientId`: Your client ID.
+- `userId`: Your user ID.
+- `clientKey`: Your client key.
+
+#### Response
+
+The response will be identical to the **POST** `/auth/token` endpoint.
+
+#### Description
+
+Use this method to retrieve an access token by passing the required parameters in the query string.
+
+---
+
+### 3. Get User's Linked Social Accounts
+
 **GET** `/socials`
 
 #### Headers
+
 ```http
 X-ClientId: your-client-id
 X-AccessCode: encoded-access-token
 ```
 
 #### Response
+
+On success, the server will return a JSON array containing the user's linked social accounts:
+
 ```json
 [
   {
@@ -76,45 +110,65 @@ X-AccessCode: encoded-access-token
 ]
 ```
 
+- `id`: The unique identifier for the social account.
+- `platform`: The name of the social platform (e.g., "LinkedIn").
+- `username`: The username of the user on the social platform.
+- `linked`: A boolean indicating whether the account is successfully linked.
+
 #### Description
-Returns a list of social accounts linked to the authenticated user.
+
+This endpoint returns a list of social media accounts associated with the authenticated user.
 
 ---
 
 ### 4. Get Social OAuth URL
+
 **GET** `/social/auth`
 
 #### Query Parameters
-- `socialName`: Name of the social network. Supported: "facebook", "instagram", "linkedin", "threads".
+
+- `socialName`: The name of the social network for which you want the OAuth URL. Supported platforms: "facebook", "linkedin". 
 
 #### Headers
+
 ```http
 X-ClientId: your-client-id
 X-AccessCode: encoded-access-token
 ```
 
 #### Response
+
+On success, the server will return a JSON object containing the OAuth URL:
+
 ```json
 {
   "OAuthUrl": "https://www.linkedin.com/oauth/authorize?client_id=..."
 }
 ```
 
+- `OAuthUrl`: The URL for the OAuth authorization page of the specified social network.
+
 #### Description
-Returns the OAuth authorization URL for the specified social network.
+
+This endpoint generates and returns the OAuth authorization URL for the specified social network. You can use this URL to authenticate users via OAuth.
 
 ---
 
 ### 5. Create Social Media Content
+
 **POST** `/`
 
 #### Headers
+
 ```http
 X-ClientId: your-client-id
 X-AccessCode: encoded-access-token
 ```
 
 #### Request
+
+To create a new post for social media, send a `POST` request with the following JSON body:
+
 ```json
 {
   "contentBody": "This is a test post.",
@@ -131,7 +185,19 @@ X-AccessCode: encoded-access-token
 }
 ```
 
+- `contentBody`: The body of the content to post.
+- `contentTitle`: The title of the content.
+- `targets`: A list of target social media accounts and their posting details.
+  - `socialAccountId`: The ID of the social account to target.
+  - `targetMethod`: The method used to publish the content. Supported methods: `copy`, `schedule`.
+  - `body`: The content body for the post.
+  - `autoSchedule`: A boolean flag indicating whether to automatically schedule the post.
+  - `scheduleTime`: The scheduled time for posting in ISO 8601 format (`YYYY-MM-DDTHH:mm:ssZ`).
+
 #### Response
+
+On success, the server will return the following response:
+
 ```json
 {
   "contentId": 456,
@@ -139,20 +205,27 @@ X-AccessCode: encoded-access-token
 }
 ```
 
+- `contentId`: The unique identifier for the created content.
+- `status`: The current status of the content. Possible values: `scheduled`, `posted`, `failed`.
+
 #### Description
-Creates content for social media accounts with optional scheduling.
+
+This endpoint allows clients to create content and schedule it for publication on linked social media accounts. The content can be posted immediately or scheduled for a future time.
 
 ---
 
 ## Authentication & Security
-- **API keys and access codes** are required for all endpoints.
-- Requests without valid credentials will return **401 Unauthorized**.
 
-## Error Handling
-Errors are returned in the following format:
-```json
-{
-  "error": "Invalid credentials",
-  "code": 401
-}
-```
+- **API keys and access tokens** are required for all endpoints. The access token is obtained through the `/auth/token` endpoint.
+- Requests without valid credentials will return a **401 Unauthorized** error.
+
+---
+
+## Example Use Case
+
+Here’s an example of using the API to create and schedule a social media post:
+
+1. **Authenticate the user** by making a `POST` request to `/auth/token` with your client ID, user ID, and client key.
+2. **Retrieve the OAuth URL** for LinkedIn by calling the `/social/auth` endpoint with `socialName=facebook`. Use the url to add a new social account.
+3. **Get the user's social accounts** by sending a `GET` request to `/socials` with the appropriate headers (`X-ClientId` and `X-AccessCode`).
+4. **Create and schedule content** by calling the `/` endpoint with the content details, social account ID, and scheduling information.
