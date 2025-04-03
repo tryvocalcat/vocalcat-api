@@ -176,8 +176,7 @@ To create a new post for social media, send a `POST` request with the following 
   "targets": [
     {
       "socialAccountId": 123,
-      "targetMethod": "copy",
-      "body": "This is a copied post.",
+      "body": "This is the content to be published independently of what the main content has.",
       "autoSchedule": true,
       "scheduleTime": "2025-03-20T10:00:00Z"
     }
@@ -211,6 +210,153 @@ On success, the server will return the following response:
 #### Description
 
 This endpoint allows clients to create content and schedule it for publication on linked social media accounts. The content can be posted immediately or scheduled for a future time.
+
+This endpoint provides flexibility for creating social media content. You can include additional details like `title` and `imageUrl`, set up custom targets, schedule posts, or publish them immediately by using the current time as `scheduleTime`. The auto-scheduling feature simplifies the process when `schedulePost` is `true` and `scheduleTime` is omitted. Targets can be tailored using publishing methods like `copy`, `optimize`, and `override`.
+
+#### Request Examples
+
+1. **Basic Example with Minimum Information and Two Targets**
+
+```json
+{
+  "body": "A quick update for my followers!",
+  "targets": [
+    {
+      "socialAccountId": 101,
+      "targetMethod": "copy",
+      "schedulePost": false
+    },
+    {
+      "socialAccountId": 102,
+      "targetMethod": "copy",
+      "schedulePost": false
+    }
+  ]
+}
+```
+
+This example includes only the body and targets. Each target will use the same content from the body. It does not specify a title or image, and the posts will not be scheduled.
+
+---
+
+2. **Example Without Schedule Time**
+
+```json
+{
+  "body": "Don't forget to check out our latest offers!",
+  "title": "Latest Offers",
+  "targets": [
+    {
+      "socialAccountId": 201,
+      "targetMethod": "optimize",
+      "schedulePost": true
+    }
+  ]
+}
+```
+
+Here, the `scheduleTime` is omitted, and since `schedulePost` is set to `true`, the system will use the auto-schedule setting. The system will use AI to optimize the content to the right platform.
+
+---
+
+3. **Example for Immediate Publishing**
+
+```json
+{
+  "body": "This is an urgent update, going live now!",
+  "title": "Urgent Update",
+  "targets": [
+    {
+      "socialAccountId": 301,
+      "targetMethod": "copy",
+      "schedulePost": true,
+      "scheduleTime": "2025-04-02T17:09:00Z"
+    }
+  ]
+}
+```
+
+In this example, `scheduleTime` is set to the current timestamp (`2025-04-02T17:09:00Z`), ensuring the post is published immediately.
+
+---
+
+### 6. Get User Content
+
+**GET** `/content`
+
+#### Headers
+
+```http
+X-ClientId: your-client-id
+X-AccessCode: encoded-access-token
+```
+
+#### Response
+
+On success, the server will return a JSON array containing the user's content:
+
+```json
+[
+  {
+    "contentId": 456,
+    "contentBody": "This is a test post.",
+    "contentTitle": "Test Title",
+    "status": "scheduled",
+    "createdAt": "2025-03-18T12:00:00Z"
+  }
+]
+```
+
+- `contentId`: The unique identifier for the content.
+- `contentBody`: The body of the content.
+- `contentTitle`: The title of the content.
+- `status`: The current status of the content. Possible values: `scheduled`, `posted`, `failed`.
+- `createdAt`: The timestamp when the content was created.
+
+#### Description
+
+This endpoint retrieves the list of content created by the user, along with its details and current status. Proper authentication headers are required to access this data.
+
+---
+
+### 7. Get Content by ID
+
+**GET** `/content/{contentId}`
+
+#### Parameters
+
+- `contentId`: The unique identifier for the content. This is passed as a path parameter.
+
+#### Headers
+
+```http
+X-ClientId: your-client-id
+X-AccessCode: encoded-access-token
+```
+
+#### Response
+
+On success, the server will return a JSON object containing the details of the specified content:
+
+```json
+{
+  "contentId": 456,
+  "contentBody": "This is a test post.",
+  "contentTitle": "Test Title",
+  "status": "scheduled",
+  "createdAt": "2025-03-18T12:00:00Z"
+}
+```
+
+- `contentId`: The unique identifier for the content.
+- `contentBody`: The body of the content.
+- `contentTitle`: The title of the content.
+- `status`: The current status of the content. Possible values: `scheduled`, `posted`, `failed`.
+- `createdAt`: The timestamp when the content was created.
+
+#### Description
+
+This endpoint retrieves the details of a specific content item based on its unique identifier. Proper authentication headers are required to access this data.
 
 ---
 
