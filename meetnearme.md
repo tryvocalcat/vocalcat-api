@@ -127,7 +127,8 @@ This endpoint returns a list of social media accounts associated with the authen
 
 #### Query Parameters
 
-- `socialName`: The name of the social network for which you want the OAuth URL. Supported platforms: "facebook", "linkedin". 
+- `socialName`: The name of the social network for which you want the OAuth URL. Supported platforms: "facebook", "linkedin".
+- `callbackUrl`: (Optional). If provided vocalcat will redirect back to this url. Vocalcat won't check for the validity of the url. If not provided Vocalcat will show a default confirmation message and the user needs to close the window.
 
 #### Headers
 
