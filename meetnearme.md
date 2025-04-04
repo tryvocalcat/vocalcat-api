@@ -151,7 +151,7 @@ On success, the server will return a JSON object containing the OAuth URL:
 
 #### Description
 
-This endpoint generates and returns the OAuth authorization URL for the specified social network. You can use this URL to authenticate users via OAuth.
+This endpoint generates and returns the OAuth authorization URL for the specified social network. You can use this URL to authenticate users via OAuth. If the process is successful a social account will be created under such user.
 
 ---
 
